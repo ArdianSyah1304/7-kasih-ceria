@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="tab-title">KAIH SPENKOP CERIA</title>
+    <!-- Chart.js for Graphics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #1cc88a;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f8f9fc;
+            --text-dark: #333;
+            --text-light: #fff;
+            --transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            --light-bg: #121212;
+            --text-dark: #f1f1f1;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--light-bg); color: var(--text-dark); transition: var(--transition); }
+
+        /* Login Page */
+        #login-page {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .login-card img { width: 80px; height: 80px; margin-bottom: 1rem; border-radius: 50%; object-fit: cover; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Dashboard Layout */
+        .wrapper { display: flex; min-height: 100vh; }
+        
+        /* Sidebar Desktop */
+        nav.sidebar {
+            width: 250px;
+            background: #4e73df;
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        nav.sidebar h2 { font-size: 1.2rem; margin-bottom: 2rem; text-align: center; }
+        .nav-item {
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.2); }
+
+        /* Main Content */
+        main { flex: 1; padding: 2rem; overflow-y: auto; }
+        .section { display: none; animation: slideIn 0.5s ease; }
+        .section.active { display: block; }
+
+        /* Card Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        /* Tables */
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; color: #333; }
+        th { background: #f4f4f4; }
+
+        /* Mobile View Fix */
+        @media (max-width: 768px) {
+            .wrapper { flex-direction: column; }
+            nav.sidebar { width: 100%; height: auto; padding: 10px; flex-direction: row; overflow-x: auto; }
+            nav.sidebar h2 { display: none; }
+            .nav-item span { display: none; }
+            main { padding: 10px; }
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Custom Styles */
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .profile-header img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .doc-card { background: white; padding: 10px; border-radius: 10px; margin-bottom: 10px; position: relative; }
+        .doc-card img, .doc-card video { width: 100%; border-radius: 8px; margin-top: 10px; }
+        .btn-delete { background: #e74a3b; padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; color: white; border: none; cursor: pointer; }
+        .btn-delete:hover { background: #c0392b; }
+        .green-check { color: #1cc88a; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loading" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; flex-direction:column; justify-content:center; align-items:center;">
+        <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--primary-color)"></i>
+        <p>Sinkronisasi Data...</p>
+    </div>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-page">
+        <div class="login-card">
+            <img id="login-logo" src="https://via.placeholder.com/80" alt="Logo">
+            <h2 id="app-name-display">KAIH SPENKOP CERIA</h2>
+            <p id="app-desc-display">Sistem Monitoring Siswa</p>
+            
+            <select id="role-select">
+                <option value="guru">Guru</option>
+                <option value="siswa">Siswa</option>
+                <option value="ortu">Orang Tua</option>
+            </select>
+            <input type="text" id="username" placeholder="Username (Khusus Guru)">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="handleLogin()">MASUK</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP DASHBOARD -->
+    <div id="main-app" style="display: none;">
+        <div class="wrapper">
+            <!-- Sidebar -->
+            <nav class="sidebar" id="sidebar">
+                <div class="profile-header">
+                    <img id="nav-logo" src="https://via.placeholder.com/50" alt="Logo">
+                    <span id="user-role-text">Guru</span>
+                </div>
+                <div id="menu-items">
+                    <!-- Menu generated by JS -->
+                </div>
+                <div class="nav-item" onclick="logout()" style="margin-top: auto; background: #e74a3b;">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </div>
+            </nav>
+
+            <!-- Content Area -->
+            <main>
+                <!-- Dashboard -->
+                <div id="sec-dashboard" class="section active">
+                    <h2 id="welcome-msg">Dashboard</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Kegiatan</h3>
+                            <p id="stat-count">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Siswa Aktif</h3>
+                            <p id="stat-siswa">0</p>
+                        </div>
+                    </div>
+                    <div style="max-width: 300px; margin: auto;">
+                        <canvas id="donutChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Form Identitas Siswa -->
+                <div id="sec-identitas-form" class="section">
+                    <h2>Lengkapi Identitas Diri</h2>
+                    <p style="color:red; font-size: 0.8rem;">*Siswa wajib mengisi identitas setiap kali masuk.</p>
+                    <input type="text" id="id-nama" placeholder="Nama Lengkap">
+                    <textarea id="id-alamat" placeholder="Alamat"></textarea>
+                    <input type="date" id="id-ttl">
+                    <input type="text" id="id-kls" placeholder="Kelas">
+                    <button onclick="simpanIdentitas()">Lanjut ke Isi Kegiatan</button>
+                </div>
+
+                <!-- Profil Sekolah -->
+                <div id="sec-profil-sekolah" class="section">
+                    <h2>Pengaturan Profil Sekolah</h2>
+                    <p>Masukkan PIN Guru untuk mengubah:</p>
+                    <input type="password" id="pin-guru" placeholder="PIN (12345)">
+                    <hr>
+                    <label>Ubah Logo Sekolah:</label>
+                    <input type="file" id="upload-logo" accept="image/*">
+                    <label>Ubah Background Login:</label>
+                    <input type="file" id="upload-bg" accept="image/*">
+                    <button onclick="updateProfilSekolah()">Perbarui Profil</button>
+                </div>
+
+                <!-- Dokumentasi -->
+                <div id="sec-dokumentasi" class="section">
+                    <h2>Dokumentasi Kegiatan</h2>
+                    <div id="form-guru-doc" style="display:none;">
+                        <input type="text" id="doc-judul" placeholder="Nama Kegiatan">
+                        <textarea id="doc-desc" placeholder="Deskripsi"></textarea>
+                        <input type="date" id="doc-tgl">
+                        <input type="file" id="doc-file" accept="image/*,video/*">
+                        <button onclick="uploadDokumentasi()">Upload Dokumentasi</button>
+                    </div>
+                    <div id="doc-list" style="margin-top: 20px;"></div>
+                </div>
+
+                <!-- Data Identitas Siswa (Guru) -->
+                <div id="sec-data-identitas" class="section">
+                    <h2>Data Identitas Siswa</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Nama</th><th>Kelas</th><th>TTL</th><th>Alamat</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody id="table-identitas"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Riwayat Kegiatan -->
+                <div id="sec-riwayat" class="section">
+                    <h2>Riwayat Kegiatan Siswa</h2>
+                    <button onclick="cetakLaporan()">Cetak PDF (Laporan)</button>
+                    <div class="table-container">
+                        <table id="table-riwayat-full">
+                            <thead>
+                                <tr><th>Tanggal</th><th>Siswa</th><th>Kegiatan</th><th>Detail</th><th>Paraf</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody id="body-riwayat"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Input Kegiatan Siswa -->
+                <div id="sec-kegiatan-siswa" class="section">
+                    <h2>Input Kegiatan Harian</h2>
+                    <p id="label-nama-siswa" style="font-weight: bold; color: var(--primary-color);"></p>
+                    <div class="stats-grid">
+                        <button onclick="showKegiatanForm('bangun')">Bangun Pagi</button>
+                        <button onclick="showKegiatanForm('ibadah')">Beribadah</button>
+                        <button onclick="showKegiatanForm('olahraga')">Olahraga</button>
+                        <button onclick="showKegiatanForm('makan')">Makan Sehat</button>
+                        <button onclick="showKegiatanForm('belajar')">Gemar Belajar</button>
+                        <button onclick="showKegiatanForm('sosial')">Bermasyarakat</button>
+                        <button onclick="showKegiatanForm('tidur')">Tidur Cepat</button>
+                    </div>
+
+                    <div id="form-kegiatan-detail" style="margin-top: 20px; display: none; background: #eee; padding: 15px; border-radius: 10px;">
+                        <h3 id="judul-kegiatan">Form</h3>
+                        <input type="hidden" id="current-kegiatan-type">
+                        <div id="dynamic-inputs"></div>
+                        <label>Bukti Foto/Video:</label>
+                        <input type="file" id="kegiatan-media" accept="image/*,video/*">
+                        <button onclick="simpanKegiatan()">Kirim Kegiatan</button>
+                    </div>
+                </div>
+
+                <!-- Notifikasi -->
+                <div id="sec-notifikasi" class="section">
+                    <h2>Notifikasi & Peringatan</h2>
+                    <div id="guru-notif-form" style="display:none;">
+                        <input type="text" id="notif-judul" placeholder="Judul Peringatan">
+                        <textarea id="notif-pesan" placeholder="Deskripsi/Pesan"></textarea>
+                        <button onclick="kirimNotifikasi()">Kirim Ke Siswa & Ortu</button>
+                    </div>
+                    <div id="notif-list"></div>
+                </div>
+
+                <!-- Pengaturan -->
+                <div id="sec-pengaturan" class="section">
+                    <h2>Pengaturan Aplikasi</h2>
+                    <label>Nama Aplikasi:</label>
+                    <input type="text" id="set-app-name">
+                    <label>Visi Misi:</label>
+                    <textarea id="set-visi-misi"></textarea>
+                    <button onclick="updateSettings()">Simpan Perubahan</button>
+                    <hr>
+                    <button onclick="toggleDarkMode()" style="background: #333;">Mode Gelap/Terang</button>
+                    <button onclick="backupData()" style="background: #1cc88a; margin-top: 10px;">Export to CSV</button>
+                    <button onclick="resetData()" style="background: #e74a3b; margin-top: 10px;">RESET SEMUA DATA</button>
+                </div>
+
+                <!-- Saran -->
+                <div id="sec-saran" class="section">
+                    <h2>Saran & Refleksi</h2>
+                    <textarea id="input-saran" placeholder="Tulis saran Anda..."></textarea>
+                    <button onclick="kirimSaran()">Kirim Saran</button>
+                    <div id="saran-list"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI DATABASE GOOGLE SHEETS ---
+        // Ganti URL di bawah ini dengan URL Web App dari Google Apps Script Anda
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1-bTySJeWYDXhQrOcnLTu1qX3OY_SjDBn156fFP-sx-hxxsnMANJt6em_pwjkj-hoVw/exec";
+
+        let db = {
+            config: {
+                appName: "KAIH SPENKOP CERIA",
+                description: "Monitoring Kedisiplinan Siswa",
+                logo: "https://via.placeholder.com/80",
+                bg: "",
+                visiMisi: "Mencetak generasi ceria dan disiplin.",
+                passGuru: ["12345"],
+                passSiswa: "123",
+                passOrtu: "1234"
+            },
+            identitas: [],
+            kegiatan: [],
+            dokumentasi: [],
+            notifikasi: [],
+            saran: []
+        };
+
+        let currentUser = null;
+        let currentSiswaSession = null; // Nama siswa saat ini
+        let myChart = null;
+
+        // --- CORE FUNCTIONS (API & STORAGE) ---
+        async function syncToCloud() {
+            if (SCRIPT_URL.includes("ISI_DENGAN")) return; // Skip jika belum setting
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(db)
+                });
+            } catch (e) { console.error("Sync Error", e); }
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function loadFromCloud() {
+            if (SCRIPT_URL.includes("ISI_DENGAN")) {
+                const local = localStorage.getItem('kaih_db');
+                if (local) db = JSON.parse(local);
+                applyConfig();
+                return;
+            }
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
+                if (data) db = data;
+            } catch (e) { console.error("Load Error", e); }
+            applyConfig();
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function saveData() {
+            localStorage.setItem('kaih_db', JSON.stringify(db));
+            syncToCloud();
+        }
+
+        function applyConfig() {
+            document.getElementById('app-name-display').innerText = db.config.appName;
+            document.getElementById('app-desc-display').innerText = db.config.visiMisi;
+            document.getElementById('login-logo').src = db.config.logo;
+            document.getElementById('nav-logo').src = db.config.logo;
+            document.getElementById('tab-title').innerText = db.config.appName;
+            document.getElementById('set-app-name').value = db.config.appName;
+            document.getElementById('set-visi-misi').value = db.config.visiMisi;
+            if(db.config.bg) document.getElementById('login-page').style.backgroundImage = `url(${db.config.bg})`;
+        }
+
+        // --- AUTH ---
+        function handleLogin() {
+            const role = document.getElementById('role-select').value;
+            const pass = document.getElementById('password').value;
+            const user = document.getElementById('username').value;
+
+            if (role === 'guru') {
+                if (user === 'guru' && db.config.passGuru.includes(pass)) loginSuccess('guru');
+                else alert('Login Guru Gagal!');
+            } else if (role === 'siswa') {
+                if (pass === db.config.passSiswa) loginSuccess('siswa');
+                else alert('Password Siswa Salah!');
+            } else if (role === 'ortu') {
+                if (pass === db.config.passOrtu) loginSuccess('ortu');
+                else alert('Password Orang Tua Salah!');
+            }
+        }
+
+        function loginSuccess(role) {
+            currentUser = { role: role };
+            document.getElementById('user-role-text').innerText = role.toUpperCase();
+            buildMenu(role);
+            showPage('main-app');
+
+            if (role === 'siswa') {
+                currentSiswaSession = null; // Reset session setiap login
+                showSection('sec-identitas-form');
+            } else {
+                showSection('sec-dashboard');
+            }
+            updateStats();
+        }
+
+        function buildMenu(role) {
+            const menu = document.getElementById('menu-items');
+            menu.innerHTML = '';
+            const items = {
+                guru: [
+                    { id: 'sec-dashboard', icon: 'fa-chart-line', label: 'Dashboard' },
+                    { id: 'sec-profil-sekolah', icon: 'fa-school', label: 'Profil Sekolah' },
+                    { id: 'sec-dokumentasi', icon: 'fa-images', label: 'Dokumentasi' },
+                    { id: 'sec-data-identitas', icon: 'fa-users', label: 'Identitas Siswa' },
+                    { id: 'sec-riwayat', icon: 'fa-history', label: 'Riwayat Siswa' },
+                    { id: 'sec-notifikasi', icon: 'fa-bell', label: 'Notifikasi' },
+                    { id: 'sec-pengaturan', icon: 'fa-cog', label: 'Pengaturan' }
+                ],
+                siswa: [
+                    { id: 'sec-dashboard', icon: 'fa-home', label: 'Dashboard' },
+                    { id: 'sec-kegiatan-siswa', icon: 'fa-edit', label: 'Isi Kegiatan' },
+                    { id: 'sec-dokumentasi', icon: 'fa-images', label: 'Dokumentasi' },
+                    { id: 'sec-notifikasi', icon: 'fa-bell', label: 'Notif Guru' },
+                    { id: 'sec-saran', icon: 'fa-comment', label: 'Saran' }
+                ],
+                ortu: [
+                    { id: 'sec-dashboard', icon: 'fa-home', label: 'Dashboard' },
+                    { id: 'sec-riwayat', icon: 'fa-history', label: 'Kegiatan Siswa' },
+                    { id: 'sec-notifikasi', icon: 'fa-bell', label: 'Pesan Guru' }
+                ]
+            };
+
+            items[role].forEach(item => {
+                menu.innerHTML += `<div class="nav-item" onclick="showSection('${item.id}')"><i class="fas ${item.icon}"></i> <span>${item.label}</span></div>`;
+            });
+        }
+
+        function logout() {
+            currentUser = null;
+            currentSiswaSession = null;
+            showPage('login-page');
+        }
+
+        // --- NAVIGATION ---
+        function showPage(id) {
+            document.querySelectorAll('#login-page, #main-app').forEach(p => p.style.display = 'none');
+            document.getElementById(id).style.display = (id === 'main-app') ? 'block' : 'flex';
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            if(id === 'sec-data-identitas') renderIdentitas();
+            if(id === 'sec-riwayat') renderRiwayat();
+            if(id === 'sec-dokumentasi') renderDokumentasi();
+            if(id === 'sec-notifikasi') renderNotifikasi();
+            if(id === 'sec-dashboard') updateStats();
+            
+            // Hak akses upload dokumentasi
+            document.getElementById('form-guru-doc').style.display = (currentUser.role === 'guru') ? 'block' : 'none';
+        }
+
+        // --- GURU LOGIC ---
+        function updateSettings() {
+            db.config.appName = document.getElementById('set-app-name').value;
+            db.config.visiMisi = document.getElementById('set-visi-misi').value;
+            saveData();
+            applyConfig(); // Langsung berubah
+            alert("Pengaturan Berhasil Disimpan!");
+        }
+
+        async function updateProfilSekolah() {
+            const pin = document.getElementById('pin-guru').value;
+            if (pin !== "12345") return alert("PIN Salah!");
+            const logo = document.getElementById('upload-logo').files[0];
+            const bg = document.getElementById('upload-bg').files[0];
+            if (logo) db.config.logo = await toBase64(logo);
+            if (bg) db.config.bg = await toBase64(bg);
+            saveData();
+            applyConfig();
+            alert("Profil diperbarui!");
+        }
+
+        function renderIdentitas() {
+            const tbody = document.getElementById('table-identitas');
+            tbody.innerHTML = '';
+            db.identitas.forEach((i, idx) => {
+                tbody.innerHTML += `<tr>
+                    <td>${i.nama}</td><td>${i.kls}</td><td>${i.ttl}</td><td>${i.alamat}</td>
+                    <td><button class="btn-delete" onclick="deleteIdentitas(${idx})">Hapus</button></td>
+                </tr>`;
+            });
+        }
+
+        function deleteIdentitas(idx) {
+            if(confirm("Hapus data identitas ini?")) {
+                db.identitas.splice(idx, 1);
+                saveData();
+                renderIdentitas();
+            }
+        }
+
+        function renderRiwayat() {
+            const tbody = document.getElementById('body-riwayat');
+            tbody.innerHTML = '';
+            db.kegiatan.forEach((k, idx) => {
+                tbody.innerHTML += `<tr>
+                    <td>${k.tgl}</td><td>${k.namaSiswa}</td><td>${k.tipe}</td><td>${k.detail}</td>
+                    <td class="green-check">✔</td>
+                    <td><button class="btn-delete" onclick="deleteRiwayat(${idx})">Hapus</button></td>
+                </tr>`;
+            });
+        }
+
+        function deleteRiwayat(idx) {
+            if(confirm("Hapus riwayat ini?")) {
+                db.kegiatan.splice(idx, 1);
+                saveData();
+                renderRiwayat();
+            }
+        }
+
+        async function uploadDokumentasi() {
+            const judul = document.getElementById('doc-judul').value;
+            const file = document.getElementById('doc-file').files[0];
+            if(!judul || !file) return alert("Lengkapi data!");
+            const fileData = await toBase64(file);
+            db.dokumentasi.push({ judul, desc: document.getElementById('doc-desc').value, tgl: document.getElementById('doc-tgl').value, file: fileData });
+            saveData();
+            renderDokumentasi();
+            alert("Dokumentasi tersimpan!");
+        }
+
+        function renderDokumentasi() {
+            const list = document.getElementById('doc-list');
+            list.innerHTML = '';
+            db.dokumentasi.forEach((d, idx) => {
+                list.innerHTML += `<div class="doc-card">
+                    <h4>${d.judul} (${d.tgl})</h4><p>${d.desc}</p>
+                    ${d.file.includes('video') ? `<video src="${d.file}" controls></video>` : `<img src="${d.file}">`}
+                    ${currentUser.role === 'guru' ? `<button class="btn-delete" onclick="deleteDoc(${idx})" style="margin-top:10px">Hapus</button>` : ''}
+                </div>`;
+            });
+        }
+
+        function deleteDoc(idx) {
+            if(confirm("Hapus dokumentasi?")) {
+                db.dokumentasi.splice(idx, 1);
+                saveData();
+                renderDokumentasi();
+            }
+        }
+
+        // --- SISWA LOGIC ---
+        function simpanIdentitas() {
+            const nama = document.getElementById('id-nama').value;
+            const data = {
+                nama: nama,
+                alamat: document.getElementById('id-alamat').value,
+                ttl: document.getElementById('id-ttl').value,
+                kls: document.getElementById('id-kls').value
+            };
+            
+            if(!nama) return alert("Nama tidak boleh kosong!");
+
+            // Logika: Jangan tambahkan jika nama sudah ada di tabel Identitas Admin
+            const exists = db.identitas.find(i => i.nama.toLowerCase() === nama.toLowerCase());
+            if (!exists) {
+                db.identitas.push(data);
+            }
+
+            currentSiswaSession = nama;
+            document.getElementById('label-nama-siswa').innerText = "Siswa: " + nama;
+            saveData();
+            showSection('sec-kegiatan-siswa');
+        }
+
+        function showKegiatanForm(type) {
+            const container = document.getElementById('dynamic-inputs');
+            document.getElementById('form-kegiatan-detail').style.display = 'block';
+            document.getElementById('current-kegiatan-type').value = type;
+            container.innerHTML = '';
+
+            const configs = {
+                'bangun': ['Jam Bangun'], 'ibadah': ['Waktu (Subuh/Lainnya)', 'Bacaan Qur\'an'],
+                'olahraga': ['Jenis Olahraga', 'Pungut Sampah (Ya/Tidak)'], 'makan': ['Menu Pagi', 'Menu Siang'],
+                'belajar': ['Mata Pelajaran'], 'sosial': ['Kegiatan', 'Dengan Siapa'], 'tidur': ['Jam Tidur']
+            };
+
+            configs[type].forEach((label, i) => {
+                container.innerHTML += `<label>${label}:</label><input type="text" id="val-${i}">`;
+            });
+            document.getElementById('judul-kegiatan').innerText = "Form " + type.toUpperCase();
+        }
+
+        async function simpanKegiatan() {
+            if(!currentSiswaSession) return alert("Identitas Hilang. Silakan isi ulang!");
+            
+            const type = document.getElementById('current-kegiatan-type').value;
+            const detail = document.getElementById('val-0')?.value + " " + (document.getElementById('val-1')?.value || "");
+            const media = document.getElementById('kegiatan-media').files[0];
+            
+            let mediaData = "";
+            if (media) mediaData = await toBase64(media);
+
+            db.kegiatan.push({
+                tgl: new Date().toLocaleDateString('id-ID'),
+                namaSiswa: currentSiswaSession,
+                tipe: type,
+                detail: detail,
+                media: mediaData
+            });
+
+            saveData();
+            alert("Kegiatan Berhasil Dikirim!");
+            document.getElementById('form-kegiatan-detail').style.display = 'none';
+            updateStats();
+        }
+
+        // --- DASHBOARD & UTILS ---
+        function updateStats() {
+            document.getElementById('stat-count').innerText = db.kegiatan.length;
+            document.getElementById('stat-siswa').innerText = db.identitas.length;
+            
+            const ctx = document.getElementById('donutChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            
+            const counts = { bangun: 0, ibadah: 0, olahraga: 0, makan: 0, belajar: 0, sosial: 0, tidur: 0 };
+            db.kegiatan.forEach(k => { if(counts[k.tipe] !== undefined) counts[k.tipe]++; });
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(counts),
+                    datasets: [{
+                        data: Object.values(counts),
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69']
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+
+        function resetData() {
+            if(confirm("HAPUS SEMUA DATA? Tindakan ini permanen.")) {
+                db.identitas = []; db.kegiatan = []; db.dokumentasi = [];
+                saveData();
+                location.reload();
+            }
+        }
+
+        function cetakLaporan() { window.print(); }
+
+        function kirimNotifikasi() {
+            db.notifikasi.push({ 
+                judul: document.getElementById('notif-judul').value, 
+                pesan: document.getElementById('notif-pesan').value, 
+                tgl: new Date().toLocaleString() 
+            });
+            saveData();
+            alert("Notifikasi dikirim!");
+        }
+
+        function renderNotifikasi() {
+            const list = document.getElementById('notif-list');
+            list.innerHTML = '';
+            document.getElementById('guru-notif-form').style.display = (currentUser.role === 'guru') ? 'block' : 'none';
+            db.notifikasi.slice().reverse().forEach(n => {
+                list.innerHTML += `<div class="doc-card"><b>${n.judul}</b> <small>${n.tgl}</small><p>${n.pesan}</p></div>`;
+            });
+        }
+
+        function kirimSaran() {
+            db.saran.push({ text: document.getElementById('input-saran').value, role: currentUser.role });
+            saveData();
+            alert("Saran terkirim!");
+            document.getElementById('input-saran').value = '';
+        }
+
+        function backupData() {
+            let csv = "Tanggal,Nama Siswa,Kegiatan,Detail\n";
+            db.kegiatan.forEach(k => { csv += `${k.tgl},${k.namaSiswa},${k.tipe},${k.detail}\n`; });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'data_kegiatan.csv'; a.click();
+        }
+
+        // Start App
+        loadFromCloud();
+    </script>
+</body>
+</html>
